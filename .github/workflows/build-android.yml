@@ -40,13 +40,27 @@ jobs:
         with:
           packages: 'platforms;android-34 build-tools;34.0.0'
 
+      - name: Debug environment
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          echo "JAVA_HOME=$JAVA_HOME"
+          ls -la "$ANDROID_HOME" 2>/dev/null || echo "ANDROID_HOME not accessible"
+          ls -la "$ANDROID_SDK_ROOT" 2>/dev/null || echo "ANDROID_SDK_ROOT not accessible"
+
       - name: Create local.properties
         run: |
           cd android_app
-          echo "sdk.dir=$ANDROID_HOME" > local.properties
-          echo "android.useAndroidX=true" >> gradle.properties
+          # Try both env vars
+          SDK_DIR="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          if [ -z "$SDK_DIR" ]; then
+            echo "ERROR: No Android SDK found!"
+            exit 1
+          fi
+          echo "sdk.dir=$SDK_DIR" > local.properties
+          cat local.properties
 
-      - name: Download and setup Gradle
+      - name: Setup Gradle wrapper
         run: |
           cd android_app
           curl -sL https://services.gradle.org/distributions/gradle-8.5-bin.zip -o /tmp/gradle.zip
@@ -59,13 +73,12 @@ jobs:
           cd android_app
           ./gradlew assembleDebug --no-daemon --stacktrace
 
-      - name: Locate APK
+      - name: List APK files
         run: |
-          echo "=== Searching for APK files ==="
-          find android_app -name "*.apk" -type f 2>/dev/null || echo "No APK found"
-          echo ""
-          echo "=== Build output tree ==="
-          find android_app/app/build/outputs -type f 2>/dev/null | head -30 || echo "No build outputs"
+          echo "=== APK files found ==="
+          find . -name "*.apk" -type f 2>/dev/null || echo "(none)"
+          echo "=== Build outputs ==="
+          find android_app/app/build -type f 2>/dev/null | head -20 || echo "(none)"
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v4

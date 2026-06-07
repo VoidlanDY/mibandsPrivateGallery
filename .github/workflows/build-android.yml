@@ -57,7 +57,15 @@ jobs:
       - name: Build Debug APK
         run: |
           cd android_app
-          ./gradlew assembleDebug --no-daemon --stacktrace --warning-mode all 2>&1 | tee /tmp/build.log
+          ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Locate APK
+        run: |
+          echo "=== Searching for APK files ==="
+          find android_app -name "*.apk" -type f 2>/dev/null || echo "No APK found"
+          echo ""
+          echo "=== Build output tree ==="
+          find android_app/app/build/outputs -type f 2>/dev/null | head -30 || echo "No build outputs"
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
@@ -65,11 +73,3 @@ jobs:
           name: PrivateGalleryCompanion-debug
           path: android_app/app/build/outputs/apk/**/*.apk
           retention-days: 30
-
-      - name: Upload build log (if failed)
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-error-log
-          path: /tmp/build.log
-          retention-days: 7

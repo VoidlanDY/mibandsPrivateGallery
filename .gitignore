@@ -31,3 +31,4 @@ Thumbs.db
 # Local config
 local.properties
 docs_quickapp/
+build_log*

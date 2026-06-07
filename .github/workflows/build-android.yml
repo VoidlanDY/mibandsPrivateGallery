@@ -23,7 +23,7 @@ jobs:
   build:
     name: Build APK
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 30
 
     steps:
       - name: Checkout code
@@ -51,19 +51,18 @@ jobs:
           gradle wrapper --gradle-version 8.5
 
       - name: Build Debug APK
-        if: ${{ github.event.inputs.build_type == 'debug' || github.event.inputs.build_type == '' }}
         run: |
           cd android_app
-          ./gradlew assembleDebug --stacktrace
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Build Release APK
-        if: ${{ github.event.inputs.build_type == 'release' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.build_type == 'release' }}
         run: |
           cd android_app
-          ./gradlew assembleRelease --stacktrace
+          ./gradlew assembleRelease --no-daemon --stacktrace
 
       - name: Upload Debug APK
-        if: ${{ github.event.inputs.build_type == 'debug' || github.event.inputs.build_type == '' }}
         uses: actions/upload-artifact@v4
         with:
           name: PrivateGalleryCompanion-debug
@@ -71,7 +70,7 @@ jobs:
           retention-days: 30
 
       - name: Upload Release APK
-        if: ${{ github.event.inputs.build_type == 'release' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.build_type == 'release' }}
         uses: actions/upload-artifact@v4
         with:
           name: PrivateGalleryCompanion-release
@@ -83,7 +82,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-debug-logs
-          path: |
-            android_app/app/build/reports/
-            android_app/app/build/outputs/logs/
+          path: android_app/app/build/reports/
           retention-days: 7

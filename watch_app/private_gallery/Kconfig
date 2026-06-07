@@ -1,0 +1,48 @@
+# Kconfig - 私密图库应用配置
+#
+# 小米手环9 Pro (openvela)
+
+config LVX_USE_DEMO_PRIVATE_GALLERY
+    bool "Private Gallery"
+    default n
+    ---help---
+        Enable the Private Gallery app for smart band.
+        This app provides a password-protected photo gallery
+        with dual-password support for privacy.
+
+if LVX_USE_DEMO_PRIVATE_GALLERY
+
+config PRIVATE_GALLERY_PROGNAME
+    string "Program name"
+    default "pgallery"
+    ---help---
+        This is the name of the program that will be used
+        when the NSH ELF program is installed.
+
+config PRIVATE_GALLERY_PRIORITY
+    int "Gallery task priority"
+    default 100
+    ---help---
+        Task priority for the private gallery application.
+
+config PRIVATE_GALLERY_STACKSIZE
+    int "Gallery stack size"
+    default 65536
+    ---help---
+        Stack size for the private gallery application.
+        Needs to be larger due to image processing and LVGL operations.
+
+config PRIVATE_GALLERY_DATA_ROOT
+    string "Gallery Data Root Path"
+    default "/data/gallery"
+    ---help---
+        Root path for storing gallery images and password data.
+
+config PRIVATE_GALLERY_PIN_LENGTH
+    int "PIN code length"
+    default 6
+    range 4 8
+    ---help---
+        Number of digits required for the access PIN code.
+
+endif # LVX_USE_DEMO_PRIVATE_GALLERY

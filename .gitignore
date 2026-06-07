@@ -1,0 +1,32 @@
+# Dependencies
+android_app/app/build/
+android_app/build/
+android_app/.gradle/
+android_app/gradle/wrapper/gradle-wrapper.jar
+android_app/local.properties
+
+# IDE
+.idea/
+*.iml
+.gradle/
+build/
+out/
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Build artifacts
+*.apk
+*.aab
+*.elf
+*.bin
+*.exe
+*.obj
+*.o
+
+# Local config
+local.properties

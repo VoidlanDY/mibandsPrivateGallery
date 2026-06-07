@@ -1,0 +1,84 @@
+name: Verify Watch App
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'watch_app/**'
+      - '.github/workflows/check-watch-app.yml'
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  core-tests:
+    name: Core Security Logic Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install GCC
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gcc
+
+      - name: Compile core test
+        run: |
+          gcc -std=c11 -Wall -Wextra -O2 \
+            -o test_core \
+            watch_app/test/test_core.c
+
+      - name: Run core security tests
+        run: |
+          ./test_core
+          echo ""
+          echo "## :white_check_mark: All core security tests passed" >> $GITHUB_STEP_SUMMARY
+
+  syntax-check:
+    name: C Syntax & Static Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gcc cppcheck
+
+      - name: Run cppcheck
+        run: |
+          cppcheck --enable=all --inconclusive --std=c11 \
+            --suppress=missingIncludeSystem \
+            --suppress=unusedFunction \
+            --suppress=checkersReport \
+            -I watch_app/private_gallery/ \
+            watch_app/private_gallery/*.c 2>&1 || true
+
+      - name: Syntax check private_gallery.c
+        run: |
+          echo "=== syntax-check: private_gallery.c ==="
+          gcc -fsyntax-only -std=c11 -Wall -Wextra -Wpedantic \
+            -I watch_app/private_gallery/ \
+            -D'__attribute__(x)=' \
+            watch_app/private_gallery/private_gallery.c 2>&1 || true
+
+      - name: Syntax check private_gallery_main.c
+        run: |
+          echo "=== syntax-check: private_gallery_main.c ==="
+          gcc -fsyntax-only -std=c11 -Wall -Wextra -Wpedantic \
+            -I watch_app/private_gallery/ \
+            -D'__attribute__(x)=' \
+            watch_app/private_gallery/private_gallery_main.c 2>&1 || true
+
+      - name: Summary
+        run: |
+          echo "## Watch App Syntax Check" >> $GITHUB_STEP_SUMMARY
+          echo "- C source syntax checked" >> $GITHUB_STEP_SUMMARY
+          echo "- Full build requires openvela SDK + LVGL" >> $GITHUB_STEP_SUMMARY
+          echo "- Run './build.sh <board> menuconfig' to enable LVX_USE_DEMO_PRIVATE_GALLERY" >> $GITHUB_STEP_SUMMARY

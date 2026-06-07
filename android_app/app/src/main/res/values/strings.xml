@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">私密图库助手</string>
+    <string name="normal_gallery">普通图库</string>
+    <string name="private_gallery">私密图库</string>
+    <string name="import_photos">导入图片</string>
+    <string name="set_password">设置密码</string>
+    <string name="verify_password">验证密码</string>
+    <string name="status_connected">手表已连接</string>
+    <string name="status_disconnected">未检测到手表的ADB连接</string>
+    <string name="status_checking">正在检查手表连接...</string>
+</resources>

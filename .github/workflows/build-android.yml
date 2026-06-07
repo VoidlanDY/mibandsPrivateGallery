@@ -23,7 +23,7 @@ jobs:
   build:
     name: Build APK
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 25
 
     steps:
       - name: Checkout code
@@ -35,52 +35,41 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: '8.5'
-
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
           packages: 'platforms;android-34 build-tools;34.0.0'
 
-      - name: Generate Gradle wrapper
+      - name: Create local.properties
         run: |
           cd android_app
-          gradle wrapper --gradle-version 8.5
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+          echo "android.useAndroidX=true" >> gradle.properties
+
+      - name: Download and setup Gradle
+        run: |
+          cd android_app
+          curl -sL https://services.gradle.org/distributions/gradle-8.5-bin.zip -o /tmp/gradle.zip
+          unzip -q /tmp/gradle.zip -d /tmp/
+          /tmp/gradle-8.5/bin/gradle wrapper --gradle-version 8.5
+          chmod +x gradlew
 
       - name: Build Debug APK
         run: |
           cd android_app
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          ./gradlew assembleDebug --no-daemon --stacktrace --warning-mode all 2>&1 | tee /tmp/build.log
 
-      - name: Build Release APK
-        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.build_type == 'release' }}
-        run: |
-          cd android_app
-          ./gradlew assembleRelease --no-daemon --stacktrace
-
-      - name: Upload Debug APK
+      - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
           name: PrivateGalleryCompanion-debug
           path: android_app/app/build/outputs/apk/debug/*.apk
           retention-days: 30
 
-      - name: Upload Release APK
-        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.build_type == 'release' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: PrivateGalleryCompanion-release
-          path: android_app/app/build/outputs/apk/release/*.apk
-          retention-days: 90
-
-      - name: Upload build reports (if failed)
+      - name: Upload build log (if failed)
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: build-debug-logs
-          path: android_app/app/build/reports/
+          name: build-error-log
+          path: /tmp/build.log
           retention-days: 7

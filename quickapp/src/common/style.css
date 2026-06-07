@@ -1,0 +1,218 @@
+/**
+ * common/style.css - 全局样式
+ *
+ * 设计基准宽度: 194px (手表屏幕)
+ * 颜色方案: 纯黑背景，无任何模式相关的颜色区别
+ */
+
+/* 页面基础 */
+.page {
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background-color: #000000;
+  padding: 0;
+  margin: 0;
+}
+
+/* 标题栏 - 所有页面统一使用 */
+.title-bar {
+  width: 100%;
+  height: 36px;
+  background-color: #0a0a0a;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+.title-text {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.title-back {
+  color: #ffffff;
+  font-size: 12px;
+  background-color: #222222;
+  border-radius: 4px;
+  width: 44px;
+  height: 24px;
+  text-align: center;
+  line-height: 24px;
+}
+
+.title-info {
+  color: #888888;
+  font-size: 10px;
+}
+
+/* 密码输入区 */
+.pin-area {
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  padding-top: 20px;
+  padding-bottom: 10px;
+}
+
+.pin-hint {
+  color: #aaaaaa;
+  font-size: 12px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.pin-dots-row {
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.pin-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 7px;
+  background-color: #333333;
+  border: 1px solid #555555;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.pin-dot-filled {
+  background-color: #ffffff;
+  border-color: #ffffff;
+}
+
+/* 数字键盘 */
+.keypad {
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  padding-top: 4px;
+}
+
+.keypad-row {
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.keypad-btn {
+  width: 50px;
+  height: 36px;
+  background-color: #1a1a1a;
+  border-radius: 6px;
+  margin: 3px;
+  justify-content: center;
+  align-items: center;
+}
+
+.keypad-btn-text {
+  color: #ffffff;
+  font-size: 18px;
+  text-align: center;
+}
+
+.keypad-btn-func {
+  background-color: #2a2a2a;
+}
+
+.keypad-btn-ok {
+  background-color: #0055aa;
+}
+
+.keypad-btn-text-sm {
+  color: #ffffff;
+  font-size: 11px;
+  text-align: center;
+}
+
+/* 图库网格 */
+.gallery-scroll {
+  width: 100%;
+  flex: 1;
+}
+
+.gallery-grid {
+  flex-direction: row;
+  flex-wrap: wrap;
+  padding: 3px;
+}
+
+.gallery-thumb {
+  width: 58px;
+  height: 58px;
+  background-color: #1a1a1a;
+  border-radius: 3px;
+  margin: 2px;
+}
+
+.gallery-thumb-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 3px;
+}
+
+.gallery-empty {
+  width: 100%;
+  padding: 40px 10px;
+  justify-content: center;
+  align-items: center;
+}
+
+.gallery-empty-text {
+  color: #666666;
+  font-size: 12px;
+  text-align: center;
+}
+
+/* 图片查看器 */
+.viewer-container {
+  width: 100%;
+  flex: 1;
+  background-color: #000000;
+  justify-content: center;
+  align-items: center;
+}
+
+.viewer-image {
+  width: 100%;
+  flex: 1;
+}
+
+.viewer-counter {
+  color: #ffffff;
+  font-size: 10px;
+  text-align: center;
+}
+
+.viewer-bottom-bar {
+  width: 100%;
+  height: 28px;
+  background-color: rgba(0, 0, 0, 0.6);
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.viewer-nav-btn {
+  color: #ffffff;
+  font-size: 11px;
+  background-color: #333333;
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+
+/* 通用文本颜色 */
+.text-white { color: #ffffff; }
+.text-gray { color: #aaaaaa; }
+.text-dim { color: #666666; }
+
+/* 居中 */
+.center { justify-content: center; align-items: center; }

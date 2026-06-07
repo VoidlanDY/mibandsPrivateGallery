@@ -1,0 +1,129 @@
+<!--
+  PinPad/index.ux - 数字键盘组件
+
+  纯数字输入键盘，不包含任何模式相关信息
+  用于密码输入页面
+-->
+<template>
+  <div class="pad-container">
+    <!-- 行1: 1 2 3 -->
+    <div class="pad-row">
+      <div class="pad-btn" onclick="onDigit(1)">
+        <text class="pad-btn-num">1</text>
+      </div>
+      <div class="pad-btn" onclick="onDigit(2)">
+        <text class="pad-btn-num">2</text>
+      </div>
+      <div class="pad-btn" onclick="onDigit(3)">
+        <text class="pad-btn-num">3</text>
+      </div>
+    </div>
+    <!-- 行2: 4 5 6 -->
+    <div class="pad-row">
+      <div class="pad-btn" onclick="onDigit(4)">
+        <text class="pad-btn-num">4</text>
+      </div>
+      <div class="pad-btn" onclick="onDigit(5)">
+        <text class="pad-btn-num">5</text>
+      </div>
+      <div class="pad-btn" onclick="onDigit(6)">
+        <text class="pad-btn-num">6</text>
+      </div>
+    </div>
+    <!-- 行3: 7 8 9 -->
+    <div class="pad-row">
+      <div class="pad-btn" onclick="onDigit(7)">
+        <text class="pad-btn-num">7</text>
+      </div>
+      <div class="pad-btn" onclick="onDigit(8)">
+        <text class="pad-btn-num">8</text>
+      </div>
+      <div class="pad-btn" onclick="onDigit(9)">
+        <text class="pad-btn-num">9</text>
+      </div>
+    </div>
+    <!-- 行4: ← 0 OK -->
+    <div class="pad-row">
+      <div class="pad-btn pad-btn-func" onclick="onBackspace()">
+        <text class="pad-btn-func-text">←</text>
+      </div>
+      <div class="pad-btn" onclick="onDigit(0)">
+        <text class="pad-btn-num">0</text>
+      </div>
+      <div class="pad-btn pad-btn-ok">
+        <text class="pad-btn-ok-text">OK</text>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style>
+.pad-container {
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 0;
+}
+
+.pad-row {
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.pad-btn {
+  width: 52px;
+  height: 38px;
+  background-color: #1a1a1a;
+  border-radius: 6px;
+  margin: 3px;
+  justify-content: center;
+  align-items: center;
+  active-opacity: 0.6;
+}
+
+.pad-btn-func {
+  background-color: #2a2a2a;
+}
+
+.pad-btn-ok {
+  background-color: #0055aa;
+}
+
+.pad-btn-num {
+  color: #ffffff;
+  font-size: 18px;
+  text-align: center;
+}
+
+.pad-btn-func-text {
+  color: #ffffff;
+  font-size: 14px;
+  text-align: center;
+}
+
+.pad-btn-ok-text {
+  color: #ffffff;
+  font-size: 12px;
+  text-align: center;
+  font-weight: bold;
+}
+</style>
+
+<script>
+export default {
+  /**
+   * 数字键点击 - 向父组件发送事件
+   */
+  onDigit(digit) {
+    this.$emit('digit', { digit: digit })
+  },
+
+  /**
+   * 退格键点击
+   */
+  onBackspace() {
+    this.$emit('backspace', {})
+  }
+}
+</script>

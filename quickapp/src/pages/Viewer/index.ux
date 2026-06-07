@@ -1,0 +1,103 @@
+<!--
+  Viewer/index.ux - 图片查看器
+
+  全屏查看单张图片，支持左右滑动切换。
+  界面与模式完全无关，不显示任何模式相关信息。
+-->
+<template>
+  <div class="page">
+    <!-- 顶部状态栏（半透明） -->
+    <div class="title-bar" style="background-color: rgba(0,0,0,0.6);">
+      <text class="title-back" onclick="goBack">←</text>
+      <text class="viewer-counter">{{ currentIndex + 1 }}/{{ total }}</text>
+      <div style="width:44px;"></div>
+    </div>
+
+    <!-- 图片显示区域 -->
+    <div class="viewer-container">
+      <image class="viewer-image"
+             src="{{ currentImage.uri }}"
+             resize-mode="contain" />
+    </div>
+
+    <!-- 底部导航栏 -->
+    <div class="viewer-bottom-bar">
+      <text class="viewer-nav-btn" onclick="showPrev">上一张</text>
+      <div style="width: 20px;"></div>
+      <text class="viewer-nav-btn" onclick="showNext">下一张</text>
+    </div>
+  </div>
+</template>
+
+<style>
+@import '../../common/style.css';
+</style>
+
+<script>
+import router from '@system.router'
+
+export default {
+  private: {
+    mode: '',
+    images: [],
+    currentIndex: 0,
+    currentImage: {},
+    total: 0
+  },
+
+  onInit() {
+    const params = this.$page ? this.$page.params : {}
+    this.mode = params.mode || 'NORMAL'
+    this.currentIndex = parseInt(params.index) || 0
+
+    try {
+      this.images = JSON.parse(params.images || '[]')
+    } catch (e) {
+      this.images = []
+    }
+
+    this.total = this.images.length
+    if (this.total > 0 && this.currentIndex < this.total) {
+      this.currentImage = this.images[this.currentIndex]
+    }
+  },
+
+  /**
+   * 上一张
+   */
+  showPrev() {
+    if (this.currentIndex > 0) {
+      this.currentIndex--
+      this.currentImage = this.images[this.currentIndex]
+    }
+  },
+
+  /**
+   * 下一张
+   */
+  showNext() {
+    if (this.currentIndex + 1 < this.total) {
+      this.currentIndex++
+      this.currentImage = this.images[this.currentIndex]
+    }
+  },
+
+  /**
+   * 返回图库
+   */
+  goBack() {
+    router.back()
+  },
+
+  /**
+   * 处理滑动手势
+   */
+  onSwipe(evt) {
+    if (evt.direction === 'left') {
+      this.showNext()
+    } else if (evt.direction === 'right') {
+      this.showPrev()
+    }
+  }
+}
+</script>

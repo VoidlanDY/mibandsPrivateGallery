@@ -1,0 +1,37 @@
+{
+  "package": "com.privategallery",
+  "name": "图库",
+  "icon": "/assets/icon.png",
+  "versionName": "1.0.0",
+  "versionCode": 1,
+  "minAPILevel": 1,
+  "features": [
+    { "name": "system.router" },
+    { "name": "system.storage" },
+    { "name": "system.file" }
+  ],
+  "permissions": [],
+  "config": {
+    "logLevel": "warn",
+    "designWidth": 194
+  },
+  "display": {
+    "backgroundColor": "#000000"
+  },
+  "deviceTypeList": ["watch"],
+  "router": {
+    "entry": "Lock",
+    "pages": {
+      "Lock": {
+        "component": "index",
+        "path": "/"
+      },
+      "Gallery": {
+        "component": "index"
+      },
+      "Viewer": {
+        "component": "index"
+      }
+    }
+  }
+}

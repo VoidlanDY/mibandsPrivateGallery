@@ -1,0 +1,173 @@
+<!--
+  Gallery/index.ux - 图库浏览页面
+
+  显示图片缩略图网格。界面与模式完全无关。
+  无论用户输入的是普通密码还是私密密码，
+  此页面UI完全相同。
+-->
+<template>
+  <div class="page">
+    <!-- 标题栏：统一"图库" -->
+    <div class="title-bar">
+      <text class="title-back" onclick="goBack">←</text>
+      <text class="title-text">图库</text>
+      <text class="title-info">{{ imageCount }}张</text>
+    </div>
+
+    <!-- 图片网格 -->
+    <list class="gallery-scroll" if="{{ imageCount > 0 }}">
+      <list-item type="gallery-grid">
+        <div class="gallery-grid">
+          <div class="gallery-thumb"
+               for="(img, idx) in images"
+               onclick="openViewer(idx)"
+               style="margin: 2px;">
+            <image class="gallery-thumb-img"
+                   src="{{ img.uri }}"
+                   resize-mode="cover" />
+          </div>
+        </div>
+      </list-item>
+    </list>
+
+    <!-- 空状态 -->
+    <div class="gallery-empty" if="{{ imageCount === 0 }}">
+      <text class="gallery-empty-text">暂无图片</text>
+      <text class="gallery-empty-text" style="font-size:10px;margin-top:6px;">
+        请使用手机端App导入
+      </text>
+    </div>
+  </div>
+</template>
+
+<style>
+@import '../../common/style.css';
+</style>
+
+<script>
+import router from '@system.router'
+import file from '@system.file'
+
+export default {
+  private: {
+    mode: '',       // 内部使用，不在UI上显示
+    images: [],
+    imageCount: 0
+  },
+
+  onInit() {
+    // 接收路由参数，获取模式信息（不显示）
+    const params = this.$app && this.$app.$def && this.$app.$def.params
+    // 尝试从router获取参数
+  },
+
+  onShow() {
+    this.loadImageList()
+  },
+
+  /**
+   * 加载图片列表
+   * 从内部文件系统读取对应模式的目录
+   */
+  loadImageList() {
+    // 尝试从页面栈获取模式参数
+    // Vela快应用通过this.$page.params获取
+    const params = this.$page ? this.$page.params : {}
+    this.mode = params.mode || 'NORMAL'
+
+    // 根据模式确定目录（内部使用，不显示）
+    const dirPath = this.mode === 'PRIVATE'
+      ? 'internal://files/private/'
+      : 'internal://files/normal/'
+
+    // 尝试列出目录中的图片文件
+    this.images = []
+
+    // 由于Vela快应用的文件API可能有限，
+    // 这里使用预定义的图片列表方式
+    // 实际部署时，图片URI列表从手机端推送时记录
+    this.loadImageManifest(dirPath)
+  },
+
+  /**
+   * 从manifest加载图片列表
+   */
+  loadImageManifest(dirPath) {
+    const manifestPath = dirPath + 'manifest.json'
+    try {
+      file.readText({
+        uri: manifestPath,
+        success: (data) => {
+          const manifest = JSON.parse(data.text || '[]')
+          const imgList = (manifest.images || []).map(function (name) {
+            return { uri: dirPath + name, name: name }
+          })
+          this.images = imgList
+          this.imageCount = imgList.length
+        },
+        fail: () => {
+          // 如果manifest不存在，尝试直接扫描目录
+          this.scanDirectory(dirPath)
+        }
+      })
+    } catch (e) {
+      this.images = []
+      this.imageCount = 0
+    }
+  },
+
+  /**
+   * 扫描目录（简单的文件枚举）
+   */
+  scanDirectory(dirPath) {
+    // Vela快应用的文件枚举能力有限
+    // 作为备选方案，从storage读取已知的图片列表
+    const storage = this.$app && this.$app.$def && this.$app.$def.storage
+    if (storage) {
+      const key = this.mode === 'PRIVATE' ? 'pg_private_imgs' : 'pg_normal_imgs'
+      storage.get({
+        key: key,
+        success: (data) => {
+          try {
+            const imgList = JSON.parse(data || '[]')
+            this.images = imgList.map(function (item) {
+              return { uri: item.uri, name: item.name }
+            })
+            this.imageCount = this.images.length
+          } catch (e) {
+            this.images = []
+            this.imageCount = 0
+          }
+        },
+        fail: () => {
+          this.images = []
+          this.imageCount = 0
+        }
+      })
+    }
+  },
+
+  /**
+   * 打开图片查看器
+   */
+  openViewer(index) {
+    router.push({
+      uri: '/Viewer',
+      params: {
+        mode: this.mode,
+        index: index,
+        images: JSON.stringify(this.images.map(function (i) {
+          return { uri: i.uri, name: i.name }
+        }))
+      }
+    })
+  },
+
+  /**
+   * 返回密码页面（即锁定）
+   */
+  goBack() {
+    router.back()
+  }
+}
+</script>

@@ -1,0 +1,41 @@
+<!--
+  app.ux - 应用入口
+  私密图库 - 小米手环9 Pro
+
+  注意：此文件包含 manifest 编译标记，请勿删除 /**manifest**/
+-->
+<script>
+import storage from '@system.storage'
+
+export default {
+  /**manifest**/
+  storage: storage,
+
+  /**
+   * 应用级共享方法 - 获取密码哈希
+   */
+  getPasswordHash(key) {
+    return new Promise((resolve) => {
+      storage.get({
+        key: key,
+        success: (data) => resolve(data || ''),
+        fail: () => resolve('')
+      })
+    })
+  },
+
+  /**
+   * 应用级共享方法 - 保存密码哈希
+   */
+  setPasswordHash(key, hash) {
+    return new Promise((resolve) => {
+      storage.set({
+        key: key,
+        value: hash,
+        success: () => resolve(true),
+        fail: () => resolve(false)
+      })
+    })
+  }
+}
+</script>

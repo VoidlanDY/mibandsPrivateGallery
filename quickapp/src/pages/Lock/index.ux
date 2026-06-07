@@ -1,0 +1,210 @@
+<!--
+  Lock/index.ux - 密码输入页面
+
+  这是用户看到的第一页。输入密码后进入图库。
+
+  隐私保护核心：
+  - 标题永远是"图库"，与模式无关
+  - 密码错误提示永远相同，不泄露"这个密码是普通还是私密"
+  - 没有任何UI元素暗示存在两种模式
+  - 没有任何设置入口
+-->
+<import name="pinpad" src="../../components/PinPad/index.ux"></import>
+
+<template>
+  <div class="page">
+    <!-- 标题栏：统一"图库" -->
+    <div class="title-bar">
+      <div></div>
+      <text class="title-text">图库</text>
+      <div></div>
+    </div>
+
+    <!-- 密码提示 -->
+    <div class="pin-area">
+      <text class="pin-hint">{{ hintText }}</text>
+
+      <!-- 6个密码圆点 -->
+      <div class="pin-dots-row">
+        <div class="{{ 'pin-dot' + (pinLen >= 1 ? ' pin-dot-filled' : '') }}"
+             for="i in [1,2,3,4,5,6]"></div>
+      </div>
+    </div>
+
+    <!-- 数字键盘 -->
+    <pinpad ondigit="onDigit" onbackspace="onBackspace"></pinpad>
+  </div>
+</template>
+
+<style>
+@import '../../common/style.css';
+</style>
+
+<script>
+import router from '@system.router'
+import storage from '@system.storage'
+import {
+  PIN_LENGTH, MAX_ATTEMPTS,
+  STORAGE_KEY_NORMAL_PW, STORAGE_KEY_PRIVATE_PW,
+  verifyPassword, resetLockState, checkLockout, recordFailedAttempt
+} from '../../common/utils.js'
+
+export default {
+  private: {
+    pinBuffer: '',
+    pinLen: 0,
+    hintText: '请输入密码',
+    lockTimer: null,
+    normalPwHash: '',
+    privatePwHash: ''
+  },
+
+  onInit() {
+    this.loadPasswordHashes()
+    resetLockState()
+  },
+
+  onShow() {
+    this.pinBuffer = ''
+    this.pinLen = 0
+    this.hintText = '请输入密码'
+    this.checkLockState()
+  },
+
+  onDestroy() {
+    if (this.lockTimer) {
+      clearInterval(this.lockTimer)
+      this.lockTimer = null
+    }
+  },
+
+  /**
+   * 加载密码哈希（从storage）
+   */
+  loadPasswordHashes() {
+    storage.get({
+      key: STORAGE_KEY_NORMAL_PW,
+      success: (data) => { this.normalPwHash = data || '' },
+      fail: () => {
+        // 首次使用，设置默认密码 "000000"
+        this.normalPwHash = ''
+      }
+    })
+    storage.get({
+      key: STORAGE_KEY_PRIVATE_PW,
+      success: (data) => { this.privatePwHash = data || '' },
+      fail: () => { this.privatePwHash = '' }
+    })
+  },
+
+  /**
+   * 检查锁定状态
+   */
+  checkLockState() {
+    const { locked, remaining } = checkLockout()
+    if (locked) {
+      this.hintText = '请等待 ' + remaining + ' 秒'
+      if (!this.lockTimer) {
+        this.lockTimer = setInterval(() => {
+          const state = checkLockout()
+          if (!state.locked) {
+            this.hintText = '请输入密码'
+            if (this.lockTimer) {
+              clearInterval(this.lockTimer)
+              this.lockTimer = null
+            }
+          } else {
+            this.hintText = '请等待 ' + state.remaining + ' 秒'
+          }
+        }, 1000)
+      }
+    } else {
+      this.hintText = '请输入密码'
+    }
+  },
+
+  /**
+   * 数字键按下
+   */
+  onDigit(evt) {
+    // 锁定中不接受输入
+    const { locked } = checkLockout()
+    if (locked) {
+      this.checkLockState()
+      return
+    }
+
+    if (this.pinLen >= PIN_LENGTH) return
+
+    this.pinBuffer += evt.detail.digit
+    this.pinLen = this.pinBuffer.length
+
+    // 输入满6位自动验证
+    if (this.pinLen >= PIN_LENGTH) {
+      // 延迟200ms让用户看到最后一个点被填充
+      setTimeout(() => { this.confirmPin() }, 200)
+    }
+  },
+
+  /**
+   * 退格键
+   */
+  onBackspace() {
+    if (this.pinLen > 0) {
+      this.pinBuffer = this.pinBuffer.slice(0, -1)
+      this.pinLen = this.pinBuffer.length
+    }
+  },
+
+  /**
+   * 验证密码
+   */
+  confirmPin() {
+    const { locked } = checkLockout()
+    if (locked) {
+      this.checkLockState()
+      return
+    }
+
+    if (this.pinLen < PIN_LENGTH) {
+      this.hintText = '请输入6位密码'
+      return
+    }
+
+    const mode = verifyPassword(
+      this.pinBuffer, this.normalPwHash, this.privatePwHash
+    )
+
+    if (mode === 'NONE') {
+      // 密码错误 - 统一错误信息，不泄露模式信息
+      const result = recordFailedAttempt()
+      this.hintText = result.message
+
+      if (result.locked) {
+        this.checkLockState()
+      }
+
+      // 清空输入
+      this.pinBuffer = ''
+      this.pinLen = 0
+      return
+    }
+
+    // 密码正确 - 跳转到图库页面
+    // 传递模式参数（仅用于内部逻辑，不在UI上显示）
+    resetLockState()
+    const pin = this.pinBuffer
+    this.pinBuffer = ''
+    this.pinLen = 0
+    this.hintText = '请输入密码'
+
+    router.push({
+      uri: '/Gallery',
+      params: {
+        mode: mode,
+        pin: pin
+      }
+    })
+  }
+}
+</script>

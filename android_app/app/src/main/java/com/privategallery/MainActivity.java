@@ -764,4 +764,3 @@ public class MainActivity extends AppCompatActivity {
         return diff == 0;
     }
 }
-// trigger ci build

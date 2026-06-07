@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 私密图库 - 手机端管理工具
 
@@ -225,9 +226,9 @@ def import_images(mode, file_paths):
         ok, msg = adb_push(fp, remote_path)
         if ok:
             success += 1
-            print(f"  ✓ {basename}")
+            print(f"  [OK] {basename}")
         else:
-            print(f"  ✗ {basename}: {msg}")
+            print(f"  [ERR] {basename}: {msg}")
 
     # 更新图片清单到配置
     if success > 0:
@@ -275,9 +276,9 @@ def print_menu():
     print()
     connected, msg = check_adb()
     if connected:
-        print(f"  [状态] ✓ {msg}")
+        print(f"  [状态] OK {msg}")
     else:
-        print(f"  [状态] ✗ {msg}")
+        print(f"  [状态] !! {msg}")
         print()
         print("  请先通过USB连接手表并开启ADB调试")
         print()
@@ -380,16 +381,16 @@ def main():
                 result = verify_watch_password(pin)
                 print()
                 if result == "both":
-                    print("  ⚠ 密码匹配: 普通图库 和 私密图库（两个密码相同！）")
+                    print("  [WARN] 密码匹配: 普通图库 和 私密图库（两个密码相同！）")
                     print("    建议设置不同的密码以确保隐私")
                 elif result == "private":
-                    print("  ★ 匹配: 私密图库 ★")
+                    print("  [PRIVATE] 匹配: 私密图库")
                     print("    （在手表上输入此密码将显示私密图片）")
                 elif result == "normal":
-                    print("  ✓ 匹配: 普通图库")
+                    print("  [NORMAL] 匹配: 普通图库")
                     print("    （在手表上输入此密码将显示普通图片）")
                 elif result == "none":
-                    print("  ✗ 不匹配任何密码")
+                    print("  [NONE] 不匹配任何密码")
                 else:
                     print(f"  密码格式不正确")
             input("\n按回车键继续...")
